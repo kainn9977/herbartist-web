@@ -10,17 +10,18 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        /* 自定義動畫與樣式 */
+        /* 自定義字體與樣式 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
 
         body {
             font-family: 'Noto Serif TC', serif;
             background-color: #FDFBF7;
-            user-select: none; /* 禁止選取文字，適合 Kiosk */
+            /* 禁止選取文字，適合 Kiosk 觸控操作 */
+            user-select: none;
             -webkit-user-select: none;
         }
 
-        /* 隱藏捲軸但保留功能 */
+        /* 隱藏捲軸但保留滾動功能 */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
@@ -51,13 +52,13 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 md:p-8 text-[#1A3C34]">
 
-    <!-- 應用程式容器 -->
+    <!-- 應用程式主容器 -->
     <div id="app" class="relative w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden border-[12px] border-[#1A3C34] min-h-[800px] flex flex-col">
         <!-- 內容將由 JavaScript 動態渲染 -->
     </div>
 
     <script>
-        // --- 1. 資料庫與設定 ---
+        // --- 1. 狀態管理 ---
         const state = {
             step: 'intro', // intro, selection, processing, result
             selectedId: null,
@@ -65,6 +66,7 @@
             lang: 'zh' // zh, en, jp
         };
 
+        // --- 2. 語系資料 ---
         const t = {
             zh: {
                 subBrand: 'HERBARTIST',
@@ -131,6 +133,7 @@
             }
         };
 
+        // --- 3. 產品資料庫 ---
         const diagnosisData = [
             {
                 id: 'heavy',
@@ -374,29 +377,34 @@
             }
         ];
 
-        // --- 2. 邏輯控制 ---
+        // --- 4. 應用程式邏輯 ---
         const app = document.getElementById('app');
 
+        // 切換語言
         function setLang(newLang) {
             state.lang = newLang;
             render();
         }
 
+        // 切換步驟
         function setStep(newStep) {
             state.step = newStep;
             render();
         }
 
+        // 選擇症狀
         function handleSelect(id) {
             state.selectedId = id;
             state.showIngredients = false;
             setStep('processing');
             
+            // 模擬運算 1.5 秒
             setTimeout(() => {
                 setStep('result');
             }, 1500);
         }
 
+        // 回首頁
         function reset() {
             state.step = 'intro';
             state.selectedId = null;
@@ -404,6 +412,7 @@
             render();
         }
 
+        // 返回選擇列表
         function backToSelection() {
             state.step = 'selection';
             state.selectedId = null;
@@ -411,24 +420,27 @@
             render();
         }
 
+        // 切換成分/介紹
         function toggleIngredients(show) {
             state.showIngredients = show;
             render();
         }
 
-        // --- 3. 渲染函數 ---
+        // --- 5. 渲染函數 (HTML 生成) ---
         
-        // V15 邏輯：卡片尺寸
+        // 卡片大小智慧判斷 (中文方形，外文變長)
         function getCardSizeClass(lang) {
             if (lang === 'zh') return 'aspect-square'; 
             if (lang === 'en') return 'h-[20rem]'; 
             return 'h-[18rem]'; 
         }
 
+        // 共用 Header
         function renderHeader() {
             return `
                 <div class="absolute top-0 w-full pl-8 pr-4 py-8 flex justify-between items-center z-20 pointer-events-none">
                     <div class="flex flex-col">
+                        <!-- Logo 圖片，若無圖片則退回文字 -->
                         <img src="image.png" alt="賣艸人家 Logo" class="h-20 w-auto object-contain" 
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
                         <div class="hidden flex-col">
@@ -476,8 +488,9 @@
                             <span class="text-sm tracking-[0.3em] uppercase">${content.touchStart}</span>
                         </div>
                     </div>
+                    <!-- 免責聲明：字級調小，限制寬度，確保兩行內 -->
                     <div class="absolute bottom-4 w-full px-8 flex justify-center opacity-60">
-                        <p class="text-[9px] text-gray-500 tracking-wider leading-tight max-w-[85%]">
+                        <p class="text-[9px] text-gray-500 tracking-wider leading-tight max-w-[90%]">
                             ${content.disclaimer}
                         </p>
                     </div>
@@ -669,7 +682,7 @@
             `;
         }
 
-        // --- 4. 主渲染循環 ---
+        // --- 6. 主渲染循環 ---
         function render() {
             let html = '';
             switch(state.step) {
@@ -684,11 +697,11 @@
                 </div>
             `;
             
-            // 重新初始化圖示
+            // 每次渲染後重新初始化圖示
             lucide.createIcons();
         }
 
-        // 初次渲染
+        // 初次執行渲染
         render();
 
     </script>
