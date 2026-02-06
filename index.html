@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>賣艸人家 - 植感生活診斷室</title>
-    <!-- 引入 Tailwind CSS -->
+    <!-- 引入 Tailwind CSS (樣式庫) -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide Icons -->
+    <!-- 引入 Lucide Icons (圖示庫) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        /* 自定義字體與樣式 */
+        /* 引入思源宋體，營造品牌質感 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
 
         body {
@@ -19,9 +19,11 @@
             /* 禁止選取文字，適合 Kiosk 觸控操作 */
             user-select: none;
             -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
         }
 
-        /* 隱藏捲軸但保留滾動功能 */
+        /* 隱藏捲軸但保留滾動功能 (美觀考量) */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
@@ -30,7 +32,7 @@
             scrollbar-width: none;
         }
 
-        /* 動畫定義 */
+        /* 自定義動畫 */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -58,15 +60,20 @@
     </div>
 
     <script>
-        // --- 1. 狀態管理 ---
+        /**
+         * 賣艸人家 - 植感生活診斷室 (Kiosk V15 Standalone)
+         * 包含：正方形牌卡(V12版)、多國語系、免責聲明、Logo 支援
+         */
+
+        // --- 1. 狀態管理 (State) ---
         const state = {
-            step: 'intro', // intro, selection, processing, result
-            selectedId: null,
-            showIngredients: false,
-            lang: 'zh' // zh, en, jp
+            step: 'intro', // 當前步驟: intro, selection, processing, result
+            selectedId: null, // 選中的症狀 ID
+            showIngredients: false, // 是否顯示成分頁
+            lang: 'zh' // 當前語言: zh, en, jp
         };
 
-        // --- 2. 語系資料 ---
+        // --- 2. 語系資料 (Translations) ---
         const t = {
             zh: {
                 subBrand: 'HERBARTIST',
@@ -87,6 +94,7 @@
                 brewingTitle: '沖泡建議：',
                 cta: '如需購買，請直接洽詢櫃台人員',
                 home: '回首頁',
+                // V15: 優化文字長度以適應兩行
                 disclaimer: '免責聲明：本產品為一般食品，旨在調理生活機能。若有特殊疾病或懷孕狀況，建議諮詢醫師後飲用。'
             },
             en: {
@@ -133,7 +141,7 @@
             }
         };
 
-        // --- 3. 產品資料庫 ---
+        // --- 3. 產品資料庫 (Data) ---
         const diagnosisData = [
             {
                 id: 'heavy',
@@ -381,19 +389,19 @@
         const app = document.getElementById('app');
 
         // 切換語言
-        function setLang(newLang) {
+        window.setLang = function(newLang) {
             state.lang = newLang;
             render();
-        }
+        };
 
         // 切換步驟
-        function setStep(newStep) {
+        window.setStep = function(newStep) {
             state.step = newStep;
             render();
-        }
+        };
 
         // 選擇症狀
-        function handleSelect(id) {
+        window.handleSelect = function(id) {
             state.selectedId = id;
             state.showIngredients = false;
             setStep('processing');
@@ -402,39 +410,32 @@
             setTimeout(() => {
                 setStep('result');
             }, 1500);
-        }
+        };
 
         // 回首頁
-        function reset() {
+        window.reset = function() {
             state.step = 'intro';
             state.selectedId = null;
             state.showIngredients = false;
             render();
-        }
+        };
 
         // 返回選擇列表
-        function backToSelection() {
+        window.backToSelection = function() {
             state.step = 'selection';
             state.selectedId = null;
             state.showIngredients = false;
             render();
-        }
+        };
 
         // 切換成分/介紹
-        function toggleIngredients(show) {
+        window.toggleIngredients = function(show) {
             state.showIngredients = show;
             render();
-        }
+        };
 
         // --- 5. 渲染函數 (HTML 生成) ---
         
-        // 卡片大小智慧判斷 (中文方形，外文變長)
-        function getCardSizeClass(lang) {
-            if (lang === 'zh') return 'aspect-square'; 
-            if (lang === 'en') return 'h-[20rem]'; 
-            return 'h-[18rem]'; 
-        }
-
         // 共用 Header
         function renderHeader() {
             return `
@@ -516,7 +517,7 @@
                                 const itemContent = item.content[state.lang];
                                 return `
                                 <button onclick="handleSelect('${item.id}')" 
-                                    class="group relative bg-white border-2 border-transparent rounded-2xl p-4 pb-8 flex flex-col items-center justify-between shadow-sm hover:border-[#D4AF37] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ${getCardSizeClass(state.lang)}">
+                                    class="group relative bg-white border-2 border-transparent rounded-2xl p-4 pb-8 flex flex-col items-center justify-between shadow-sm hover:border-[#D4AF37] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 aspect-square">
                                     <div class="p-3 rounded-full bg-gray-50 group-hover:bg-[#1A3C34] group-hover:text-[#D4AF37] text-[#1A3C34] transition-colors duration-500 mt-2">
                                         <i data-lucide="${item.icon}" class="w-8 h-8"></i>
                                     </div>
@@ -697,11 +698,11 @@
                 </div>
             `;
             
-            // 每次渲染後重新初始化圖示
+            // 重新初始化圖示
             lucide.createIcons();
         }
 
-        // 初次執行渲染
+        // 初次渲染
         render();
 
     </script>
